@@ -1,0 +1,47 @@
+version: '3'
+
+
+vars:
+  BOOTSTRAP_SERVER: 'kafka:29092'
+
+tasks:
+
+  build:
+    desc: builds the application, including Kafka and their dependencies
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose up -d
+
+  clean:
+    desc: stops and removes the application, including Kafka and their dependencies
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose down
+
+  kafka-topics:
+    desc: lists the Kafka topics
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-topics --bootstrap-server {{.BOOTSTRAP_SERVER}} --list
+
+  kafka-topics-describe:
+    desc: describes a Kafka topic
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-topics --bootstrap-server {{.BOOTSTRAP_SERVER}} --describe --topic {{.TOPIC}}
+
+  kafka-topics-create:
+    desc: creates a Kafka topic
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-topics --bootstrap-server {{.BOOTSTRAP_SERVER}} --create --topic {{.TOPIC}} --partitions {{.PARTITIONS| default 1}} --replication-factor {{.REPLICATION| default 1}}
+
+  kafka-topics-delete:
+    desc: deletes a Kafka topic
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-topics --bootstrap-server {{.BOOTSTRAP_SERVER}} --delete --topic {{.TOPIC}}
+
+  kafka-produce-messages:
+    desc: publish a message to a Kafka topic
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-console-producer --bootstrap-server {{.BOOTSTRAP_SERVER}} --topic {{.TOPIC}}
+
+  kafka-consume-messages:
+    desc: consume messages from a Kafka topic
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: docker compose exec kafka kafka-console-consumer --bootstrap-server {{.BOOTSTRAP_SERVER}} --topic {{.TOPIC}}
